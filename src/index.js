@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
-
+import './mock/index'
+import './mock/data2'
+// import App from './App';
+import AppRouter from  './router/AppRouter'
 ReactDOM.render(
-    <App />
+   <AppRouter/>
   ,
   document.getElementById('root')
 );
