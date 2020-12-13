@@ -1,6 +1,11 @@
 import React, { Component } from "react";
-import { Row, Col } from "antd";
-import { Form, Input, Button, Checkbox } from "antd";
+import { Form, Input, Button, Checkbox, Row, Col} from "antd";
+import { Redirect } from "react-router-dom"
+import UserUtils from '../../utils/storageUtils'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+
+import * as userAction from '../../action/user'
 import axios from "axios";
 import api from "../../api";
 const layout = {
@@ -11,7 +16,7 @@ const tailLayout = {
   wrapperCol: { offset: 2, span: 16 },
 };
 
-export default class Login extends Component {
+ class Login extends Component {
   getDate2 = () => {
     axios
       .post("/postdata1", {
@@ -29,17 +34,23 @@ export default class Login extends Component {
   };
 
   render() {
-    const onFinish = ({ username, password }) => {
+
+    const user = UserUtils.getUser()
+    if(user.id){
+        return <Redirect to="/" />
+    }
+    const onFinish = async ({ username, password }) => {
      
-      api.UserApi.login({
+     const res = await api.UserApi.login({
         username,
         password,
       })
-      .then((res) => {
-        console.log(res);
         // 登陆成功 
+        console.log(res);
+        UserUtils.saveUser(res)
+        this.props.userAction.saveUser(res)
+        this.props.history.replace('/')
         // token 存 sessiontorage and redux 
-      });
       // this.getDate2()
       console.log("Success:", username);
     };
@@ -113,3 +124,15 @@ export default class Login extends Component {
     );
   }
 }
+const mapStateToProps = state =>{
+    return {
+        user:state.user
+    }
+}
+const mapDispatchToProps = dispatch =>{
+    return {
+        userAction:bindActionCreators(userAction,dispatch)
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login)
